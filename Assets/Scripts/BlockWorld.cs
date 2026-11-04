@@ -37,24 +37,25 @@ public class BlockWorld : MonoBehaviour
         blocks.Clear();
         for (int x = 0; x < levelSettings.levelWidth; x++)
         {
+            var shiftedX = Mathf.FloorToInt(x - levelSettings.levelWidth / 2);
+
             for (int y = 0; y < levelSettings.levelHeight; y++)
             {
                 bool isCave = false;
                 foreach (var noisePass in levelSettings.caveGenParameters.noisePasses)
                 {
                     var pathNoiseValue = Mathf.PerlinNoise(x / noisePass.xScale, y / noisePass.yScale);
-                    if (pathNoiseValue > noisePass.lowerThreshold && pathNoiseValue < noisePass.upperThreshold)
-                        isCave = true;
+                    foreach (var threshold in noisePass.thresholds)
+                    {
+                        if (pathNoiseValue > threshold.x && pathNoiseValue < threshold.y)
+                            isCave = true;
+                    }
                 }
                 if (isCave)
                     continue;
                 var noiseValue = Mathf.PerlinNoise(x / blockSqaure.noiseScale, y / blockSqaure.noiseScale);
-                SOBlockType type;
-                if (noiseValue > 0.5)
-                    type = blockSqaure.types[0];
-                else
-                    type = blockSqaure.types[1];
-                blocks.Add(new Vector2Int(x, y), new BlockData(type));
+                int index = Mathf.FloorToInt(blockSqaure.types.Length* noiseValue);
+                blocks.Add(new Vector2Int(shiftedX, y), new BlockData(blockSqaure.types[index]));
             }
         }
     }
@@ -92,6 +93,7 @@ public class BlockWorld : MonoBehaviour
         {
             blocks.Remove(blockPos);
             blockDestroyed?.Invoke(blockData, blockPos);
+
         }
     }
 

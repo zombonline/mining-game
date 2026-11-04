@@ -4,8 +4,7 @@ using UnityEngine;
 public struct NoisePass
 {
     public float xScale, yScale;
-    public float lowerThreshold;
-    public float upperThreshold;
+    public Vector2[] thresholds;
 }
 [CreateAssetMenu(fileName = "CaveGenParameters", menuName = "Scriptable Objects/CaveGenParameters")]
 public class SOCaveGenParameters : ScriptableObject

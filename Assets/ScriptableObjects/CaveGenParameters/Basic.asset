@@ -13,11 +13,8 @@ MonoBehaviour:
   m_Name: Basic
   m_EditorClassIdentifier: Assembly-CSharp::SOCaveGenParameters
   noisePasses:
-  - xScale: 13
-    yScale: 7
-    lowerThreshold: 0.42
-    upperThreshold: 0.59
-  - xScale: 12
-    yScale: 20
-    lowerThreshold: 0.8
-    upperThreshold: 0.9
+  - xScale: 20
+    yScale: 18
+    thresholds:
+    - {x: 0.35, y: 0.45}
+    - {x: 0.53, y: 0.62}

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 13312, guid: 0000000000000000e000000000000000, type: 0}
   m_Name: Crack 2
   m_EditorClassIdentifier: UnityEngine.dll::UnityEngine.Tilemaps.Tile
-  m_Sprite: {fileID: -7186203415982934756, guid: 8f03e64b72622b048a36634026c4294f, type: 3}
+  m_Sprite: {fileID: 21300000, guid: ca737ecd41ac22c45a0dbaae6e31afa1, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Transform:
     e00: 1

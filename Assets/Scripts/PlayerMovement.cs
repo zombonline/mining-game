@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
-    public float speed = 6f;
+    public ModifiedFloat speed = new ModifiedFloat(6f);
     private Vector2 movementDir;
 
     private void Awake()
@@ -26,13 +26,10 @@ public class PlayerMovement : MonoBehaviour
         if (kb.aKey.isPressed) input.x -= 1;
 
         movementDir = input.normalized;
-        
-
     }
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + movementDir * speed * Time.fixedDeltaTime);
-        
+        rb.MovePosition(rb.position + movementDir * speed.Value * Time.fixedDeltaTime);
     }
 }

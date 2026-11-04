@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class LevelManager : MonoBehaviour
 {
-    [SerializeField] SOLevelSettings levelSettings;
+    [SerializeField] public  SOLevelSettings levelSettings;
 
 
     //THIS SCRIPT IS PURELY FOR RUNNING THE LEVEL, I.E MOVING THE BARRIER HEIGHT VALUE UP, CHECKING PLAYER POSITION RELATIVE TO THE BARRIER
