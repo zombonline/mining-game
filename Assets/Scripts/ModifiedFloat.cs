@@ -26,11 +26,10 @@ public class ModifiedFloat
             this.value = value;
             this.type = type;
         }
-
     }
     [SerializeField] private float baseValue;
     [NaughtyAttributes.ReadOnly, SerializeField] private Dictionary<string, Modifier> modifiers = new Dictionary<string, Modifier>();
-    [NaughtyAttributes.ReadOnly] public float Value;
+    public float Value { get; private set; }
 
     public ModifiedFloat(float baseValue)
     {
@@ -40,7 +39,7 @@ public class ModifiedFloat
 
     private void SetModifiedValue()
     {
-        float flatSum= 0;
+        float flatSum = 0;
         float percentMultiplier = 1;
         foreach(var mod in modifiers.Values)
         {

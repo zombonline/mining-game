@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::SOLevelSettings
   levelWidth: 50
   levelHeight: 500
-  baseSpeed: 1
+  baseSpeed: 0.1
   growth: 0.8
   scale: 100
   caveGenParameters: {fileID: 11400000, guid: c792531bd53e1fc4aa72b9860a92c857, type: 2}

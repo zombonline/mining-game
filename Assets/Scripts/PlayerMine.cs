@@ -16,6 +16,7 @@ public class PlayerMine : MonoBehaviour
     [SerializeField] float swingCooldown = 0.3f;   // pause after reaching the far side
     [SerializeField] float maxStepDegrees = 3f;    // finer = fewer missed blocks
     [SerializeField] bool pierce = true;           // hit every block on the line, or just the first
+    [SerializeField] float originWidth = 0.2f;
     [SerializeField] int hitPoints = 1;
 
     [Header("References")]
@@ -31,6 +32,7 @@ public class PlayerMine : MonoBehaviour
 
     SwingState state = SwingState.Idle;
     float swingAngle;           // current offset from aim, in degrees
+    float originOffset;
     int swingDir = 1;           // 1 = sweeping +, -1 = sweeping back
     float cooldownEndTime;
 
@@ -90,14 +92,20 @@ public class PlayerMine : MonoBehaviour
         float half = arcDegrees * 0.5f;
         float remaining = swingSpeed * dt;
 
+
         while (remaining > 0f)
         {
             float step = Mathf.Min(remaining, maxStepDegrees);
             remaining -= step;
 
             swingAngle += step * swingDir;
+            var swingPercent = swingAngle / half;
+            originOffset = swingPercent * -originWidth/2;
+
             bool reachedEnd = Mathf.Abs(swingAngle) >= half;
             if (reachedEnd) swingAngle = half * swingDir;   // clamp so we never overshoot the arc
+
+
 
             CastAt(swingAngle);
 
@@ -117,7 +125,7 @@ public class PlayerMine : MonoBehaviour
     void CastAt(float angleOffset)
     {
         Vector2 dir = DirFromOffset(angleOffset);
-        Vector2 origin = transform.position;
+        Vector2 origin = transform.position + (aimTransform.right * originOffset);
 
         int count = Physics2D.Raycast(origin, dir, filter, hitBuffer, mineReach);
         for (int i = 0; i < count; i++)
@@ -154,7 +162,10 @@ public class PlayerMine : MonoBehaviour
         // Arc outline
         Gizmos.color = new Color(1f, 1f, 1f, 0.35f);
         Vector3 prev = origin + (Vector3)(DirFromOffset(-half) * mineReach);
-        Gizmos.DrawLine(origin, prev);
+        Vector3 originLeft = origin + (aimTransform.right * -originWidth/2);
+        Vector3 originRight = origin + (aimTransform.right * originWidth/2);
+        Gizmos.DrawLine(originLeft, originRight);
+        Gizmos.DrawLine(originRight, prev);
 
         const int segments = 24;
         for (int i = 1; i <= segments; i++)
@@ -164,7 +175,7 @@ public class PlayerMine : MonoBehaviour
             Gizmos.DrawLine(prev, next);
             prev = next;
         }
-        Gizmos.DrawLine(origin, prev);
+        Gizmos.DrawLine(originLeft, prev);
 
         // Aim centre line
         Gizmos.color = Color.cyan;
@@ -175,9 +186,10 @@ public class PlayerMine : MonoBehaviour
             // Swing ray: red while swinging, yellow while resting in cooldown
             if (state != SwingState.Idle)
             {
+                Vector2 modifiedOrigin = origin + (aimTransform.right * originOffset);
                 Vector3 tip = origin + (Vector3)(DirFromOffset(swingAngle) * mineReach);
                 Gizmos.color = state == SwingState.Swinging ? Color.red : Color.yellow;
-                Gizmos.DrawLine(origin, tip);
+                Gizmos.DrawLine(modifiedOrigin, tip);
                 Gizmos.DrawWireSphere(tip, 0.05f);
             }
 
