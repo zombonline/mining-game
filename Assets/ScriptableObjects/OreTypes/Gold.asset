@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a39aee0b4d6252f4ca1c5838cd52158a, type: 3}
+  m_Name: Gold
+  m_EditorClassIdentifier: Assembly-CSharp::SOOreType
+  name: Gold
+  sprite: {fileID: 21300000, guid: dfcd89f2e6f68504fb14b9d80d6153df, type: 3}
+  tile: {fileID: 11400000, guid: 4b495930bc3970d4297167d08b725ff5, type: 2}
+  xpValue: 20
+  dropCountRange: {x: 1, y: 2}

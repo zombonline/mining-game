@@ -1,9 +1,11 @@
-using NaughtyAttributes;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting.Antlr3.Runtime.Misc;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Tilemaps;
+using static ModifiedFloat;
+using static PlayerStats;
 
 public class PlayerMine : MonoBehaviour
 {
@@ -24,7 +26,6 @@ public class PlayerMine : MonoBehaviour
     [SerializeField] Tilemap blockTilemap;
     [SerializeField] Transform aimTransform;
     [SerializeField] BlockWorld blockWorld;
-    [SerializeField] PlayerMovement playerMovement;
 
     [Header("Gizmos")]
     [SerializeField] bool drawGizmos = true;
@@ -40,43 +41,52 @@ public class PlayerMine : MonoBehaviour
     readonly RaycastHit2D[] hitBuffer = new RaycastHit2D[8];
     ContactFilter2D filter;
 
+
     struct HitFlash { public Vector3 pos; public float time; }
     readonly List<HitFlash> recentHits = new List<HitFlash>();
 
+    private bool held = false;
+    public event Action<bool> heldStateChanged;
+    [SerializeField] Transform pickaxeHandle;
 
     void Awake()
     {
         filter = new ContactFilter2D { useLayerMask = true, layerMask = blockSortingLayer, useTriggers = false };
-        playerMovement = GetComponent<PlayerMovement>();
+    }
+    private void Start()
+    {
+        var penalty = SceneContext.Player.Stats.GetStat(StatKey.MoveSpeed)
+    .AddModifier("Mining", 1f, ModifierType.Percent, source: SceneContext.Player.Stats.GetStat(StatKey.MoveSpeedMining));
+        penalty.SetActive(false);
+        heldStateChanged += penalty.SetActive;
     }
 
     void Update()
     {
-        var held = Mouse.current.leftButton.isPressed;
-        if (held && !playerMovement.speed.HasModifier("mining"))
-            playerMovement.speed.AddModifier("mining", 0.5f, ModifiedFloat.ModifierType.Percent);
-        else if(!held)
-            playerMovement.speed.RemoveModifier("mining");
+        var heldThisFrame = Mouse.current.leftButton.isPressed;
+        if (held != heldThisFrame)
+            heldStateChanged?.Invoke(heldThisFrame);
+        held = heldThisFrame;
 
+        switch (state)
+        {
+            case SwingState.Idle:
+                if (held) BeginSwing();
+                break;
 
-            switch (state)
-            {
-                case SwingState.Idle:
-                    if (held) BeginSwing();
-                    break;
+            case SwingState.Swinging:
+                AdvanceSwing(Time.deltaTime);   // ignores the button: swing always completes
+                break;
 
-                case SwingState.Swinging:
-                    AdvanceSwing(Time.deltaTime);   // ignores the button: swing always completes
-                    break;
+            case SwingState.Cooldown:
+                if (Time.time >= cooldownEndTime)
+                {
+                    state = SwingState.Idle;
+                    if (held) BeginSwing();     // still holding: next swing starts from this side
+                }
+                break;
+        }
 
-                case SwingState.Cooldown:
-                    if (Time.time >= cooldownEndTime)
-                    {
-                        state = SwingState.Idle;
-                        if (held) BeginSwing();     // still holding: next swing starts from this side
-                    }
-                    break;
-            }
     }
 
     void BeginSwing()
@@ -126,7 +136,9 @@ public class PlayerMine : MonoBehaviour
     {
         Vector2 dir = DirFromOffset(angleOffset);
         Vector2 origin = transform.position + (aimTransform.right * originOffset);
-
+        pickaxeHandle.transform.position = origin;
+        float angleDegrees = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
+        pickaxeHandle.transform.rotation = Quaternion.Euler(0f, 0f, angleDegrees - 90);
         int count = Physics2D.Raycast(origin, dir, filter, hitBuffer, mineReach);
         for (int i = 0; i < count; i++)
         {

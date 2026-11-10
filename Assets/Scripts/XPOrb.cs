@@ -2,6 +2,7 @@ using UnityEngine;
 
 public class XpOrb : MonoBehaviour
 {
+    [SerializeField] SpriteRenderer sr;
     [Header("Pickup")]
     [SerializeField] float pullRadius = 3f;
     [SerializeField] float collectRadius = 0.3f;
@@ -22,10 +23,13 @@ public class XpOrb : MonoBehaviour
 
     private int value = 1;
 
-    // Call from the spawner right after Instantiate
+    public void SetXPType(Sprite sprite, int value)
+    {
+        sr.sprite = sprite;
+        this.value = value;
+    }
     public void Launch(Vector2 origin)
     {
-        Debug.Log("Launching from: " + origin);
         transform.position = origin;
         burstStart = origin;
         burstTarget = origin + Random.insideUnitCircle.normalized * Random.Range(burstDistanceRange.x, burstDistanceRange.y);
@@ -56,7 +60,7 @@ public class XpOrb : MonoBehaviour
 
     void UpdateIdle()
     {
-        float dist = ((Vector2)(Player.Instance.transform.position - transform.position)).magnitude;
+        float dist = ((Vector2)(SceneContext.Player.transform.position - transform.position)).magnitude;
         if (dist <= pullRadius)
         {
             speed = startSpeed;
@@ -66,7 +70,7 @@ public class XpOrb : MonoBehaviour
 
     void UpdateAttracted()
     {
-        Vector2 toPlayer = Player.Instance.transform.position - transform.position;
+        Vector2 toPlayer = SceneContext.Player.transform.position - transform.position;
         float dist = toPlayer.magnitude;
 
         speed = Mathf.Min(speed + acceleration * Time.deltaTime, maxSpeed);
@@ -77,7 +81,7 @@ public class XpOrb : MonoBehaviour
 
     void Collect()
     {
-        Player.Instance.XP.AddXp(value);
+        SceneContext.Player.XP.AddXp(value);
         Destroy(gameObject);
     }
 }

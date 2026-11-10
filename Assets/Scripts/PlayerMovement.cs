@@ -4,12 +4,16 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
-    public ModifiedFloat speed = new ModifiedFloat(6f);
     private Vector2 movementDir;
-
+    private ModifiedFloat moveSpeed;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void Start()
+    {
+        moveSpeed = SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.MoveSpeed);
     }
 
     void Update()
@@ -30,6 +34,7 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.MovePosition(rb.position + movementDir * speed.Value * Time.fixedDeltaTime);
+        rb.MovePosition(rb.position + movementDir * moveSpeed.Value * Time.fixedDeltaTime);
     }
+
 }

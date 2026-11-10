@@ -16,17 +16,16 @@ public class DamageTileMapView : MonoBehaviour
     }
     private void OnDisable()
     {
-        blockWorld.blockDestroyed += HandleBlockDestroyed;
-        blockWorld.blockDamaged += HandeBlockDamaged;
+        blockWorld.blockDestroyed -= HandleBlockDestroyed;
+        blockWorld.blockDamaged -= HandeBlockDamaged;
     }
 
     private void HandeBlockDamaged(BlockData blockData, Vector2Int pos)
     {
-        if (blockData.damage >= blockData.blockType.health)
+        if (blockData.damage >= blockData.blockType.health || blockData.blockType.health == -1)
             return;
         float healthPercentage = (float)blockData.damage / blockData.blockType.health;
         int index = Mathf.FloorToInt(damageStateTiles.Length * healthPercentage);
-        Debug.Log("Index: " + index +" health percent " + healthPercentage);
 
         var damageStateTile = damageStateTiles[index];
         damageTilemap.SetTile((Vector3Int)pos, damageStateTile);

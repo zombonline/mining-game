@@ -7,20 +7,20 @@ public class BlockTileMapView : MonoBehaviour
     [SerializeField] Tilemap blockTilemap;
     private void Start()
     {
-        HandleBlockUpdated();
+        HandleBlocksCreated();
     }
     private void OnEnable()
     {
-        blockWorld.blocksCreated += HandleBlockUpdated;
+        blockWorld.blocksCreated += HandleBlocksCreated;
         blockWorld.blockDestroyed += HandleBlockDestroyed;
     }
     private void OnDisable()
     {
-        blockWorld.blocksCreated -= HandleBlockUpdated;
+        blockWorld.blocksCreated -= HandleBlocksCreated;
         blockWorld.blockDestroyed -= HandleBlockDestroyed;
     }
 
-    private void HandleBlockUpdated()
+    private void HandleBlocksCreated()
     {
         blockTilemap.ClearAllTiles();
         foreach(var blockData in blockWorld.blocks)

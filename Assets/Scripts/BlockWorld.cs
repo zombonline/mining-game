@@ -1,5 +1,3 @@
-using NaughtyAttributes;
-using NUnit.Framework;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -9,91 +7,122 @@ public struct BlockData
 {
     public SOBlockType blockType;
     public int damage;
-    public BlockData(SOBlockType type)
+    public SOOreType oreType;
+    public BlockData(SOBlockType type, SOOreType oreType)
     {
         this.blockType = type;
         this.damage = 0;
+        this.oreType = oreType;
     }
 }
 
-[System.Serializable]
-public struct BlockSqaure
-{
-    public SOBlockType[] types;
-    public int x;
-    public int y;
-    public float noiseScale;
-}
+
 
 public class BlockWorld : MonoBehaviour
 {
     [SerializeField]
     public Dictionary<Vector2Int, BlockData> blocks = new Dictionary<Vector2Int, BlockData>();
     [SerializeField] private SOLevelSettings levelSettings;
-    [SerializeField] BlockSqaure blockSqaure;
+    [SerializeField] SOBlockType baseBlock;
+    private int seed = 102450; //temp seed
 
-    private void Awake()
+    private void Start()
     {
         blocks.Clear();
+        var passes = levelSettings.caveGenParameters.blockNoisePasses;
+        var rng = new System.Random(seed);
+        var offsets = new Vector2[passes.Length];
+        var waveOffsets = new float[passes.Length];
+        
+        for (int i = 0; i < passes.Length; i++)
+        {
+            offsets[i] = new Vector2(rng.Next(0, 10000), rng.Next(0, 10000));
+            waveOffsets[i] = rng.Next(0, 10000);
+        }
+        var orePasses = levelSettings.caveGenParameters.orePasses;
+        var oreOffsets = new Vector2[orePasses.Length];
+        for (int i = 0; i < orePasses.Length; i++)
+            oreOffsets[i] = new Vector2(rng.Next(0, 10000), rng.Next(0, 10000));
         for (int x = 0; x < levelSettings.levelWidth; x++)
         {
             var shiftedX = Mathf.FloorToInt(x - levelSettings.levelWidth / 2);
 
             for (int y = 0; y < levelSettings.levelHeight; y++)
             {
-                bool isCave = false;
-                foreach (var noisePass in levelSettings.caveGenParameters.noisePasses)
+                var blockPos = new Vector2Int(shiftedX, y);
+                SOBlockType finalBlockType = baseBlock;
+                for (int i = 0; i < passes.Length; i++)
                 {
-                    var pathNoiseValue = Mathf.PerlinNoise(x / noisePass.xScale, y / noisePass.yScale);
-                    foreach (var threshold in noisePass.thresholds)
-                    {
-                        if (pathNoiseValue > threshold.x && pathNoiseValue < threshold.y)
-                            isCave = true;
-                    }
+                    var p = passes[i];
+                    float presence = p.Presence(y, waveOffsets[i]);
+                    if (presence <= 0f) continue;
+
+                    float n = Mathf.PerlinNoise(
+                        shiftedX / p.noisePass.xScale + offsets[i].x,
+                        y / p.noisePass.yScale + offsets[i].y);
+
+                    if (p.Hits(n, presence))
+                        finalBlockType = p.blockType;
                 }
-                if (isCave)
-                    continue;
-                var noiseValue = Mathf.PerlinNoise(x / blockSqaure.noiseScale, y / blockSqaure.noiseScale);
-                int index = Mathf.FloorToInt(blockSqaure.types.Length* noiseValue);
-                blocks.Add(new Vector2Int(shiftedX, y), new BlockData(blockSqaure.types[index]));
+                if (finalBlockType != null)
+                {
+                    SOOreType ore = null;
+                    for (int o = 0; o < orePasses.Length; o++)       // list rare ores first
+                    {
+                        var op = orePasses[o];
+                        if (!op.CanHost(finalBlockType)) continue;
+                        float c = op.Chance(y);
+                        if (c <= 0f) continue;
+
+                        if (op.clusterScale > 0f)
+                        {
+                            float cn = Mathf.PerlinNoise(
+                                shiftedX / op.clusterScale + oreOffsets[o].x,
+                                y / op.clusterScale + oreOffsets[o].y);
+                            if (cn < op.clusterThreshold) continue;
+                        }
+
+                        if (Hash01(shiftedX, y, seed + o * 7919) < c) { ore = op.oreType; break; }
+                    }
+                    SetBlock(blockPos, finalBlockType, ore);
+                }
             }
         }
+        blocksCreated?.Invoke();
     }
 
-    [Button]
-    public void GenerateBlockSqaure()
+    private void SetBlock(Vector2Int blockPos, SOBlockType blockType, SOOreType oreType = null)
     {
-        blocks.Clear();
-        for(int i = 0; i < blockSqaure.x; i++)
-        {
-            for(int j = 0; j < blockSqaure.y; j++)
-            { 
-                var noiseValue = Mathf.PerlinNoise(i / blockSqaure.noiseScale, j / blockSqaure.noiseScale);
-                SOBlockType type;
-                if (noiseValue > 0.5)
-                    type = blockSqaure.types[0];
-                else
-                    type = blockSqaure.types[1];
-                Debug.Log("Noise value: " + noiseValue);
-                blocks.Add(new Vector2Int(i, j),new BlockData(type));
-            }
-        }
-        Debug.Log("Placed " + blockSqaure.x * blockSqaure.y + " blocks");
-        blocksCreated.Invoke();
+        if (blocks.ContainsKey(blockPos))
+            blocks[blockPos] = new BlockData(blockType, oreType);
+        else
+            blocks.Add(blockPos, new BlockData(blockType, oreType));
     }
+
 
     public void Hit(Vector2Int blockPos, int hitPoints)
     {
-        var blockData = blocks[blockPos];
+        if (!blocks.TryGetValue(blockPos, out var blockData) || blockData.blockType == null || blockData.blockType.health == -1) 
+            return;
         blockData.damage += hitPoints;
         blocks[blockPos] = blockData;
-        Debug.Log("Hit tile at " + blockPos + ", damage now " + blockData.damage);
         blockDamaged?.Invoke(blockData, blockPos);
         if (blockData.damage >= blockData.blockType.health)
         {
             blocks.Remove(blockPos);
             blockDestroyed?.Invoke(blockData, blockPos);
 
+        }
+    }
+    static float Hash01(int x, int y, int seed)
+    {
+        unchecked
+        {
+            uint h = (uint)seed;
+            h ^= (uint)x * 0x27d4eb2du; h = (h ^ (h >> 15)) * 0x85ebca6bu;
+            h ^= (uint)y * 0x165667b1u; h = (h ^ (h >> 13)) * 0xc2b2ae35u;
+            h ^= h >> 16;
+            return (h & 0xFFFFFF) / (float)0x1000000;   // 0..1
         }
     }
 

@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Block 4
   m_EditorClassIdentifier: Assembly-CSharp::SOBlockType
   name: Block 4
-  health: 6
-  sprite: {fileID: 21300000, guid: 42305a7e68dcd9e4cae989384b729c00, type: 3}
-  tile: {fileID: 11400000, guid: 311dc28b1fe2cfb429c5872d7aec3a3d, type: 2}
-  xp: 8
+  health: 30
+  sprite: {fileID: 21300000, guid: aa0a3a782d029cb4ebb5ba1f1024f2cb, type: 3}
+  tile: {fileID: 11400000, guid: 991686237d30a27478a7cf17f33a89d5, type: 2}
+  xp: 9

@@ -8,17 +8,17 @@ public class XPDisplay : MonoBehaviour
     [SerializeField] Slider xpSlider;
     private void OnEnable()
     {
-        Player.Instance.XP.onXpGain += HandleXPGain;
-        Player.Instance.XP.onLevelUp += HandleLevelUp;
+        SceneContext.Player.XP.onXpGain += HandleXPGain;
+        SceneContext.Player.XP.onLevelUp += HandleLevelUp;
     }
     private void OnDisable()
     {
-        Player.Instance.XP.onXpGain -= HandleXPGain;
-        Player.Instance.XP.onLevelUp -= HandleLevelUp;
+        SceneContext.Player.XP.onXpGain -= HandleXPGain;
+        SceneContext.Player.XP.onLevelUp -= HandleLevelUp;
     }
     private void HandleXPGain(int currentXp)
     {
-        xpSlider.value = (float)currentXp / Player.Instance.XP.xpRequired;
+        xpSlider.value = (float)currentXp / SceneContext.Player.XP.xpRequired;
     }
     private void HandleLevelUp(int newLevel)
     {

@@ -12,9 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e03fc54e331dd42489cfd4b7bae56554, type: 3}
   m_Name: Basic
   m_EditorClassIdentifier: Assembly-CSharp::SOLevelSettings
-  levelWidth: 50
+  levelWidth: 18
   levelHeight: 500
-  baseSpeed: 0.1
+  baseSpeed: 0.2
   growth: 0.8
   scale: 100
   caveGenParameters: {fileID: 11400000, guid: c792531bd53e1fc4aa72b9860a92c857, type: 2}

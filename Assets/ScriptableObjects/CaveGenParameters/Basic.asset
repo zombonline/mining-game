@@ -12,9 +12,53 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7abfa876ee911c841a7e91ba4b8bb37f, type: 3}
   m_Name: Basic
   m_EditorClassIdentifier: Assembly-CSharp::SOCaveGenParameters
-  noisePasses:
-  - xScale: 20
-    yScale: 18
-    thresholds:
-    - {x: 0.35, y: 0.45}
-    - {x: 0.53, y: 0.62}
+  blockNoisePasses:
+  - noisePass:
+      xScale: 20
+      yScale: 30
+      thresholds:
+      - {x: 0.45, y: 0.55}
+    blockType: {fileID: 0}
+    minY: 0
+    fadeIn: 0
+    waveLength: 0
+    waveStrength: 0
+  - noisePass:
+      xScale: 8
+      yScale: 8
+      thresholds:
+      - {x: 0.68, y: 1}
+    blockType: {fileID: 0}
+    minY: 0
+    fadeIn: 0
+    waveLength: 0
+    waveStrength: 0
+  - noisePass:
+      xScale: 7
+      yScale: 14
+      thresholds:
+      - {x: 0.56, y: 0.94}
+    blockType: {fileID: 11400000, guid: 135cfb5ed19381d4881ff4fd49031160, type: 2}
+    minY: 50
+    fadeIn: 60
+    waveLength: 90
+    waveStrength: 0.5
+  - noisePass:
+      xScale: 7
+      yScale: 9
+      thresholds:
+      - {x: 0, y: 0.3}
+    blockType: {fileID: 11400000, guid: 156549baab454aa4e92465ebd0d2e898, type: 2}
+    minY: 5
+    fadeIn: 5
+    waveLength: 20
+    waveStrength: 0.682
+  orePasses:
+  - oreType: {fileID: 11400000, guid: 8f542fda3491a184d83afca72e879e5b, type: 2}
+    chance: 0.2
+    minY: 20
+    fadeIn: 25
+    hostBlocks:
+    - {fileID: 11400000, guid: c1712d81b7c994242a80d3d15fae578d, type: 2}
+    clusterScale: 3
+    clusterThreshold: 0.422
