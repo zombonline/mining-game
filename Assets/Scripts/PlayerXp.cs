@@ -3,11 +3,11 @@ using UnityEngine;
 public class PlayerXp : MonoBehaviour
 {
     public int currentLevel;
-    public int currentXp;
+    public float currentXp;
     public int xpRequired;
     public void AddXp(int xp)
     {
-        currentXp += xp;
+        currentXp += xp * SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.XPMultiplier).Value;
         onXpGain?.Invoke(currentXp);
         if (currentXp >= xpRequired)
         {
@@ -17,5 +17,5 @@ public class PlayerXp : MonoBehaviour
         }
     }
     public event Action<int> onLevelUp;
-    public event Action<int> onXpGain;
+    public event Action<float> onXpGain;
 }

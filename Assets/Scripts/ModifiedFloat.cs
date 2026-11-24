@@ -1,3 +1,4 @@
+using JetBrains.Annotations;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,12 +19,21 @@ public class ModifiedFloat
         Percent   // multiplier (1.1 = +10%, 0.5 = half), multiplied together
     }
 
+    public enum RoundType
+    {
+        None,
+        Floor,
+        Round,
+        Ceil
+    }
+
     [Serializable]
     public class Modifier
     {
         public ModifierType type;
         [SerializeField] private float value;
         [SerializeField] private bool active = true;
+        
 
         // Runtime-only links. Not serialized: Unity would store a copy of the
         // source stat rather than a reference to the live one.
@@ -68,6 +78,7 @@ public class ModifiedFloat
     }
 
     [SerializeField] private float baseValue;
+    [SerializeField] private RoundType roundType;
     [NaughtyAttributes.ReadOnly, SerializeField]
     private Dictionary<string, Modifier> modifiers = new Dictionary<string, Modifier>();
 
@@ -75,6 +86,7 @@ public class ModifiedFloat
     // Unity's deserialization (constructor not run). Flag is "calculated"
     // rather than "dirty" so its default (false) means "needs calculating".
     [NonSerialized] private float cached;
+    private int cachedInt;
     [NonSerialized] private bool calculated;
 
     public event Action onValueChanged;
@@ -85,6 +97,14 @@ public class ModifiedFloat
         {
             if (!calculated) Recalculate();
             return cached;
+        }
+    }
+    public int IntValue
+    {
+        get
+        {
+            if (!calculated) Recalculate();
+            return cachedInt;
         }
     }
 
@@ -111,6 +131,18 @@ public class ModifiedFloat
         }
 
         cached = (baseValue + flatSum) * percentMultiplier;
+        switch(roundType)
+        {
+            case RoundType.Floor:
+                cachedInt = Mathf.FloorToInt(cached);
+                break;
+            case RoundType.Round:
+                cachedInt = Mathf.RoundToInt(cached);
+                break;
+            case RoundType.Ceil:
+                cachedInt = Mathf.CeilToInt(cached);
+                break;
+        }
         calculated = true;
     }
 

@@ -104,7 +104,7 @@ public class BlockWorld : MonoBehaviour
     {
         if (!blocks.TryGetValue(blockPos, out var blockData) || blockData.blockType == null || blockData.blockType.health == -1) 
             return;
-        blockData.damage += hitPoints;
+        blockData.damage += hitPoints * SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.DamageBase).IntValue;
         blocks[blockPos] = blockData;
         blockDamaged?.Invoke(blockData, blockPos);
         if (blockData.damage >= blockData.blockType.health)

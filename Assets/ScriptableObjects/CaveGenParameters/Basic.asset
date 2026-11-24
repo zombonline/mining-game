@@ -18,11 +18,11 @@ MonoBehaviour:
       yScale: 30
       thresholds:
       - {x: 0.45, y: 0.55}
-    blockType: {fileID: 0}
+    blockType: {fileID: 11400000, guid: c1712d81b7c994242a80d3d15fae578d, type: 2}
     minY: 0
     fadeIn: 0
-    waveLength: 0
-    waveStrength: 0
+    waveLength: 10
+    waveStrength: 0.4
   - noisePass:
       xScale: 8
       yScale: 8

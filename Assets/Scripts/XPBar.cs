@@ -16,9 +16,9 @@ public class XPDisplay : MonoBehaviour
         SceneContext.Player.XP.onXpGain -= HandleXPGain;
         SceneContext.Player.XP.onLevelUp -= HandleLevelUp;
     }
-    private void HandleXPGain(int currentXp)
+    private void HandleXPGain(float currentXp)
     {
-        xpSlider.value = (float)currentXp / SceneContext.Player.XP.xpRequired;
+        xpSlider.value = currentXp / SceneContext.Player.XP.xpRequired;
     }
     private void HandleLevelUp(int newLevel)
     {
