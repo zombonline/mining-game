@@ -8,18 +8,19 @@ public class LevelManager : MonoBehaviour
     //THIS SCRIPT IS PURELY FOR RUNNING THE LEVEL, I.E MOVING THE BARRIER HEIGHT VALUE UP, CHECKING PLAYER POSITION RELATIVE TO THE BARRIER
     public float barrierY;
     public float highestPlayerY;
-    public GameObject player;
 
 
     private void Update()
     {
         barrierY += GetSpeed(highestPlayerY) * Time.deltaTime;
-        highestPlayerY = Mathf.Max(player.transform.position.y, highestPlayerY);
+        highestPlayerY = Mathf.Max(SceneContext.Player.transform.position.y, highestPlayerY);
     }
     private void LateUpdate()
     {
-        if (player.transform.position.y < barrierY)
-            Debug.Log("You lose");
+        if (SceneContext.Player.transform.position.y < barrierY)
+        {
+            SceneContext.Player.Health.Damage(.1f * Time.deltaTime);
+        }
     }
 
     private void OnDrawGizmos()

@@ -12,14 +12,12 @@ public class PlayerMine : MonoBehaviour
     enum SwingState { Idle, Swinging, Cooldown }
 
     [Header("Swing")]
-    [SerializeField] float mineReach = 1.5f;
-    [SerializeField] float arcDegrees = 100f;      // total sweep width
+
     [SerializeField] float swingSpeed = 400f;      // degrees per second
-    [SerializeField] float swingCooldown = 0.3f;   // pause after reaching the far side
     [SerializeField] float maxStepDegrees = 3f;    // finer = fewer missed blocks
     [SerializeField] bool pierce = true;           // hit every block on the line, or just the first
     [SerializeField] float originWidth = 0.2f;
-    [SerializeField] int hitPoints = 1;
+
 
     [Header("References")]
     [SerializeField] LayerMask blockSortingLayer;
@@ -92,14 +90,14 @@ public class PlayerMine : MonoBehaviour
     void BeginSwing()
     {
         state = SwingState.Swinging;
-        swingAngle = -arcDegrees * 0.5f * swingDir;  // start at the side we finished on
+        swingAngle = -SceneContext.Player.Stats.GetStat(StatKey.PickaxeSwingArc).Value * 0.5f * swingDir;  
         hitThisPass.Clear();
         CastAt(swingAngle);
     }
 
     void AdvanceSwing(float dt)
     {
-        float half = arcDegrees * 0.5f;
+        float half = SceneContext.Player.Stats.GetStat(StatKey.PickaxeSwingArc).Value * 0.5f;
         float remaining = swingSpeed * dt;
 
 
@@ -123,7 +121,7 @@ public class PlayerMine : MonoBehaviour
             {
                 swingDir = -swingDir;                        // next swing goes the other way
                 state = SwingState.Cooldown;
-                cooldownEndTime = Time.time + swingCooldown;
+                cooldownEndTime = Time.time + SceneContext.Player.Stats.GetStat(StatKey.PickaxeCooldown).Value;
                 return;
             }
         }
@@ -139,7 +137,7 @@ public class PlayerMine : MonoBehaviour
         pickaxeHandle.transform.position = origin;
         float angleDegrees = Mathf.Atan2(dir.y, dir.x) * Mathf.Rad2Deg;
         pickaxeHandle.transform.rotation = Quaternion.Euler(0f, 0f, angleDegrees - 90);
-        int count = Physics2D.Raycast(origin, dir, filter, hitBuffer, mineReach);
+        int count = Physics2D.Raycast(origin, dir, filter, hitBuffer, SceneContext.Player.Stats.GetStat(StatKey.PickaxeReach).Value);
         for (int i = 0; i < count; i++)
         {
             var hit = hitBuffer[i];
@@ -148,7 +146,7 @@ public class PlayerMine : MonoBehaviour
 
             if (hitThisPass.Add(cell))
             {
-                blockWorld.Hit(cell, hitPoints);
+                blockWorld.Hit(cell, SceneContext.Player.Stats.GetStat(StatKey.PickaxeDamage).IntValue);
 #if UNITY_EDITOR
                 recentHits.RemoveAll(h => Time.time - h.time > hitFlashDuration);
                 recentHits.Add(new HitFlash
@@ -169,11 +167,11 @@ public class PlayerMine : MonoBehaviour
         if (!drawGizmos || aimTransform == null) return;
 
         Vector3 origin = transform.position;
-        float half = arcDegrees * 0.5f;
+        float half = SceneContext.Player.Stats.GetStat(StatKey.PickaxeSwingArc).Value * 0.5f;
 
         // Arc outline
         Gizmos.color = new Color(1f, 1f, 1f, 0.35f);
-        Vector3 prev = origin + (Vector3)(DirFromOffset(-half) * mineReach);
+        Vector3 prev = origin + (Vector3)(DirFromOffset(-half) * SceneContext.Player.Stats.GetStat(StatKey.PickaxeReach).Value);
         Vector3 originLeft = origin + (aimTransform.right * -originWidth/2);
         Vector3 originRight = origin + (aimTransform.right * originWidth/2);
         Gizmos.DrawLine(originLeft, originRight);
@@ -183,7 +181,7 @@ public class PlayerMine : MonoBehaviour
         for (int i = 1; i <= segments; i++)
         {
             float a = Mathf.Lerp(-half, half, i / (float)segments);
-            Vector3 next = origin + (Vector3)(DirFromOffset(a) * mineReach);
+            Vector3 next = origin + (Vector3)(DirFromOffset(a) * SceneContext.Player.Stats.GetStat(StatKey.PickaxeReach).Value);
             Gizmos.DrawLine(prev, next);
             prev = next;
         }
@@ -191,7 +189,7 @@ public class PlayerMine : MonoBehaviour
 
         // Aim centre line
         Gizmos.color = Color.cyan;
-        Gizmos.DrawLine(origin, origin + aimTransform.up * mineReach);
+        Gizmos.DrawLine(origin, origin + aimTransform.up * SceneContext.Player.Stats.GetStat(StatKey.PickaxeReach).Value);
 
         if (Application.isPlaying)
         {
@@ -199,7 +197,7 @@ public class PlayerMine : MonoBehaviour
             if (state != SwingState.Idle)
             {
                 Vector2 modifiedOrigin = origin + (aimTransform.right * originOffset);
-                Vector3 tip = origin + (Vector3)(DirFromOffset(swingAngle) * mineReach);
+                Vector3 tip = origin + (Vector3)(DirFromOffset(swingAngle) * SceneContext.Player.Stats.GetStat(StatKey.PickaxeReach).Value);
                 Gizmos.color = state == SwingState.Swinging ? Color.red : Color.yellow;
                 Gizmos.DrawLine(modifiedOrigin, tip);
                 Gizmos.DrawWireSphere(tip, 0.05f);

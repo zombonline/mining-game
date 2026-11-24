@@ -7,4 +7,5 @@ public class Player : MonoBehaviour
     public PlayerMovement Movement;
     public PlayerAim Aim;
     public PlayerStats Stats;
+    public Health Health;
 }
