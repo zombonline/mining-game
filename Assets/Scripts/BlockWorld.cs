@@ -6,13 +6,15 @@ using UnityEngine;
 public struct BlockData
 {
     public SOBlockType blockType;
-    public int damage;
+    public float damage;
     public SOOreType oreType;
-    public BlockData(SOBlockType type, SOOreType oreType)
+    public bool unstable;
+    public BlockData(SOBlockType type, SOOreType oreType, bool unstable)
     {
         this.blockType = type;
         this.damage = 0;
         this.oreType = oreType;
+        this.unstable = unstable;
     }
 }
 
@@ -84,34 +86,34 @@ public class BlockWorld : MonoBehaviour
 
                         if (Hash01(shiftedX, y, seed + o * 7919) < c) { ore = op.oreType; break; }
                     }
-                    SetBlock(blockPos, finalBlockType, ore);
+                    SetBlock(blockPos, finalBlockType, ore, rng.NextDouble() > 0.9d) ;
                 }
             }
         }
         blocksCreated?.Invoke();
     }
 
-    private void SetBlock(Vector2Int blockPos, SOBlockType blockType, SOOreType oreType = null)
+    private void SetBlock(Vector2Int blockPos, SOBlockType blockType, SOOreType oreType = null, bool unstable = false)
     {
         if (blocks.ContainsKey(blockPos))
-            blocks[blockPos] = new BlockData(blockType, oreType);
+            blocks[blockPos] = new BlockData(blockType, oreType, unstable);
         else
-            blocks.Add(blockPos, new BlockData(blockType, oreType));
+            blocks.Add(blockPos, new BlockData(blockType, oreType, unstable));
     }
 
 
-    public void Hit(Vector2Int blockPos, int hitPoints)
+    public void Hit(Vector2Int blockPos, float hitPoints)
     {
         if (!blocks.TryGetValue(blockPos, out var blockData) || blockData.blockType == null || blockData.blockType.health == -1) 
             return;
-        blockData.damage += hitPoints * SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.DamageBase).IntValue;
+        blockData.damage += hitPoints * SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.DamageBase).Value;
+        Debug.Log("Hit at" + blockPos + " Damage now: " + blockData.damage);
         blocks[blockPos] = blockData;
         blockDamaged?.Invoke(blockData, blockPos);
         if (blockData.damage >= blockData.blockType.health)
         {
             blocks.Remove(blockPos);
             blockDestroyed?.Invoke(blockData, blockPos);
-
         }
     }
     static float Hash01(int x, int y, int seed)

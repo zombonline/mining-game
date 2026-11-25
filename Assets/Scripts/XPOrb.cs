@@ -4,7 +4,6 @@ public class XpOrb : MonoBehaviour
 {
     [SerializeField] SpriteRenderer sr;
     [Header("Pickup")]
-    [SerializeField] float pullRadius = 3f;
     [SerializeField] float collectRadius = 0.3f;
     [SerializeField] float startSpeed = 2f;
     [SerializeField] float acceleration = 40f;
@@ -61,7 +60,7 @@ public class XpOrb : MonoBehaviour
     void UpdateIdle()
     {
         float dist = ((Vector2)(SceneContext.Player.transform.position - transform.position)).magnitude;
-        if (dist <= pullRadius)
+        if (dist <= SceneContext.Player.Stats.GetStat(PlayerStats.StatKey.XPMagnetiseDistance).Value) 
         {
             speed = startSpeed;
             state = State.Attracted;

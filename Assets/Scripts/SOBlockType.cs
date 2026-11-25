@@ -6,10 +6,10 @@ using UnityEngine.Tilemaps;
 public class SOBlockType : ScriptableObject
 {
     public string name;
-    public int health;
+    public float health;
     [ShowAssetPreview]
     public Sprite sprite;
     [ShowAssetPreview]
-    public TileBase tile;
+    public TileBase tile, unstableTile;
     public int xp;
 }
