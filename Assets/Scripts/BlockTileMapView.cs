@@ -25,7 +25,10 @@ public class BlockTileMapView : MonoBehaviour
         blockTilemap.ClearAllTiles();
         foreach(var blockData in blockWorld.blocks)
         {
-            blockTilemap.SetTile((Vector3Int)blockData.Key, blockData.Value.blockType.tile);
+            if(blockData.Value.unstable)
+                blockTilemap.SetTile((Vector3Int)blockData.Key, blockData.Value.blockType.unstableTile);
+            else
+                blockTilemap.SetTile((Vector3Int)blockData.Key, blockData.Value.blockType.tile);
         }
     }
     private void HandleBlockDestroyed(BlockData data, Vector2Int pos)

@@ -146,7 +146,7 @@ public class PlayerMine : MonoBehaviour
 
             if (hitThisPass.Add(cell))
             {
-                blockWorld.Hit(cell, SceneContext.Player.Stats.GetStat(StatKey.PickaxeDamage).IntValue);
+                blockWorld.Hit(cell, SceneContext.Player.Stats.GetStat(StatKey.PickaxeDamage).Value);
 #if UNITY_EDITOR
                 recentHits.RemoveAll(h => Time.time - h.time > hitFlashDuration);
                 recentHits.Add(new HitFlash
